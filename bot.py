@@ -1,7 +1,7 @@
 """
 bot.py
 ------
-Entry point for ScheduleBot.
+Entry point for TickTock Bot.
 
 Startup sequence
 ----------------
@@ -53,7 +53,7 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout),
     ],
 )
-logger = logging.getLogger("schedulebot")
+logger = logging.getLogger("ticktock")
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ if not TOKEN:
 # Bot class
 # ---------------------------------------------------------------------------
 
-class ScheduleBot(commands.Bot):
+class TickTockBot(commands.Bot):
     """
     Custom Bot subclass that owns the database connection and handles the
     full startup / teardown lifecycle.
@@ -141,7 +141,7 @@ class ScheduleBot(commands.Bot):
         # against old messages continue to work.
         await self._register_persistent_views()
 
-        logger.info("ScheduleBot is ready.")
+        logger.info("TickTock Bot is ready.")
 
     async def close(self) -> None:
         """Gracefully close the DB connection when the bot shuts down."""
@@ -187,7 +187,7 @@ class ScheduleBot(commands.Bot):
 
 async def main() -> None:
     """Instantiate and run the bot."""
-    bot = ScheduleBot()
+    bot = TickTockBot()
     async with bot:
         await bot.start(TOKEN)
 
