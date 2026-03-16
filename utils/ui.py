@@ -60,14 +60,25 @@ _DAY_OPTIONS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Hour dropdown options  (00:00 → 23:00, max 25 per Discord limit)
+# Hour dropdown options  (00:00 → 23:00 in 12-hour AM/PM format, max 25 per Discord limit)
 # ---------------------------------------------------------------------------
+
+def _format_hour_12h(hour: int) -> str:
+    """Convert 24-hour format to 12-hour AM/PM format."""
+    if hour == 0:
+        return "12:00 AM"
+    elif hour < 12:
+        return f"{hour}:00 AM"
+    elif hour == 12:
+        return "12:00 PM"
+    else:
+        return f"{hour - 12}:00 PM"
 
 _HOUR_OPTIONS = [
     discord.SelectOption(
-        label=f"{h:02d}:00",
+        label=_format_hour_12h(h),
         value=str(h),
-        description=f"{'AM' if h < 12 else 'PM'} slot",
+        description=f"{'Morning' if h < 12 else 'Afternoon/Evening'} slot",
     )
     for h in range(24)
 ]
@@ -193,18 +204,33 @@ class SubmitButton(discord.ui.Button):
 
             # 4. Edit the original schedule message with the new image
             if interaction.message:
-                new_file = discord.File(
-                    fp=__import__("io").BytesIO(png_bytes),
-                    filename="heatmap.png",
-                )
-                embed = interaction.message.embeds[0] if interaction.message.embeds else _build_embed(title, count)
-                embed.set_image(url="attachment://heatmap.png")
-                embed.set_footer(text=f"{count} participant(s) • Timezone: UTC")
-                await interaction.message.edit(embed=embed, attachments=[new_file])
+                try:
+                    new_file = discord.File(
+                        fp=__import__("io").BytesIO(png_bytes),
+                        filename="heatmap.png",
+                    )
+                    embed = interaction.message.embeds[0] if interaction.message.embeds else _build_embed(title, count)
+                    embed.set_image(url="attachment://heatmap.png")
+                    embed.set_footer(text=f"{count} participant(s) • Timezone: UTC")
+                    await interaction.message.edit(embed=embed, attachments=[new_file])
+                except discord.Forbidden as forbidden_error:
+                    # Handle Discord 403 Forbidden (error code: 50001): Missing Access
+                    if forbidden_error.code == 50001:
+                        await interaction.followup.send(
+                            "❌ **Missing Permissions**\n\n"
+                            "I don't have permission to attach files in this channel. "
+                            "Please ask a server admin to enable the **Attach Files** permission for me.",
+                            ephemeral=True,
+                        )
+                        logger.warning("Missing 'Attach Files' permission in channel=%s", interaction.channel_id)
+                        return
+                    else:
+                        # Re-raise if it's a different forbidden error
+                        raise
 
             # 5. Acknowledge the user
             days_str  = ", ".join(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][d] for d in sorted(selected_days))
-            hours_str = ", ".join(f"{h:02d}:00" for h in sorted(selected_hours))
+            hours_str = ", ".join(_format_hour_12h(h) for h in sorted(selected_hours))
             await interaction.followup.send(
                 f"✅ **Availability saved!**\n"
                 f"**Days:** {days_str}\n"
@@ -271,10 +297,12 @@ def _build_embed(title: str, participant_count: int = 0) -> discord.Embed:
     embed = discord.Embed(
         title=f"📅  {title}",
         description=(
+            "**Welcome to TeamSync!** 🎯\n\n"
             "Use the dropdowns below to select your available days and hours, "
-            "then press **Submit** to update the heat-map.\n\n"
-            "All times are stored in **UTC**.  Use `/set_timezone` to view "
-            "the grid in your local time."
+            "then press **Submit** to save your availability.\n\n"
+            "💡 *The heatmap will appear here after the first person submits!*\n\n"
+            "All times are stored in **UTC**. Use `/set_timezone` to view "
+            "the grid in your local time with `/schedule view`."
         ),
         colour=discord.Colour.green(),
     )

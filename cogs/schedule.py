@@ -72,11 +72,12 @@ class ScheduleCog(commands.Cog, name="Schedule"):
         title: str,
     ) -> None:
         """
-        1. Defer the interaction immediately (image generation takes time).
+        1. Defer the interaction immediately.
         2. Create a database row for the schedule.
-        3. Generate an empty (all-grey) heatmap.
-        4. Post the embed + image + persistent view.
-        5. Store the resulting message ID so future submissions can edit it.
+        3. Post the embed + persistent view (NO image yet - live monitor feel).
+        4. Store the resulting message ID so future submissions can edit it.
+
+        The heatmap image will only be generated after the first user submits.
         """
         await interaction.response.defer(thinking=True)
 
@@ -89,29 +90,17 @@ class ScheduleCog(commands.Cog, name="Schedule"):
                 created_by=interaction.user.id,
             )
 
-            # Step 2 – generate an empty heatmap
-            png_bytes = generate_heatmap(
-                grid={},
-                title=title,
-                timezone_name="UTC",
-                participant_count=0,
-            )
-
-            # Step 3 – build embed and view
+            # Step 2 – build embed and view (NO IMAGE YET - live dashboard feel)
             embed = build_schedule_embed(title, participant_count=0)
-            embed.set_image(url="attachment://heatmap.png")
-
             view = ScheduleView(schedule_id=schedule_id, db=self.db)
 
-            # Step 4 – send the message
-            image_file = discord.File(fp=io.BytesIO(png_bytes), filename="heatmap.png")
+            # Step 3 – send the message WITHOUT an image
             msg = await interaction.followup.send(
                 embed=embed,
-                file=image_file,
                 view=view,
             )
 
-            # Step 5 – store the message ID for future edits
+            # Step 4 – store the message ID for future edits
             await self.db.update_schedule_message_id(schedule_id, msg.id)
 
             # Re-register the persistent view so the bot can route interactions
@@ -236,6 +225,142 @@ class ScheduleCog(commands.Cog, name="Schedule"):
             ephemeral=True,
         )
         logger.info("Timezone set: user=%s tz=%s", interaction.user.id, timezone)
+
+    # ------------------------------------------------------------------
+    # /help
+    # ------------------------------------------------------------------
+
+    @app_commands.command(
+        name="help",
+        description="Learn how to use TeamSync Bot.",
+    )
+    async def help_command(self, interaction: discord.Interaction) -> None:
+        """Display a helpful guide about bot features and workflow."""
+        embed = discord.Embed(
+            title="📚 TeamSync Bot Help",
+            description=(
+                "**TeamSync** helps your team coordinate availability with interactive "
+                "schedules and live-updating heatmaps.\n\n"
+                "**🔹 Getting Started**\n"
+                "1. Use `/schedule start` to create a new availability grid\n"
+                "2. Select your available days and hours from the dropdowns\n"
+                "3. Click **Submit** to save your availability\n"
+                "4. Watch the heatmap update live as teammates respond!\n\n"
+            ),
+            colour=discord.Colour.blue(),
+        )
+
+        embed.add_field(
+            name="📅 /schedule start",
+            value=(
+                "Create a new weekly availability schedule in the current channel. "
+                "The bot will post interactive dropdowns for team members to select their available times."
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
+            name="👀 /schedule view",
+            value=(
+                "View the latest schedule in this channel, converted to your personal timezone. "
+                "This message is private (only you can see it)."
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
+            name="🌍 /set_timezone",
+            value=(
+                "Set your preferred timezone (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`). "
+                "This affects how times display when you use `/schedule view`."
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
+            name="🔐 /permissions",
+            value=(
+                "Get the bot invite link with the exact permissions needed. "
+                "Share this with server admins for easy setup."
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
+            name="💡 Tips",
+            value=(
+                "• All times are stored in **UTC** but displayed in your timezone\n"
+                "• You can update your availability anytime by resubmitting\n"
+                "• The heatmap colors show overlap: darker green = more people available\n"
+                "• Use 12-hour format (AM/PM) for easier reading"
+            ),
+            inline=False,
+        )
+
+        embed.set_footer(text="Need more help? Contact your server admin or visit our documentation.")
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    # ------------------------------------------------------------------
+    # /permissions
+    # ------------------------------------------------------------------
+
+    @app_commands.command(
+        name="permissions",
+        description="Get the OAuth2 invite link with required bot permissions.",
+    )
+    async def permissions_command(self, interaction: discord.Interaction) -> None:
+        """Display the bot invite URL with exact permissions needed."""
+        if not self.bot.user:
+            await interaction.response.send_message(
+                "❌ Unable to generate invite link at this time.",
+                ephemeral=True,
+            )
+            return
+
+        # Required permissions:
+        # - View Channels (1024)
+        # - Send Messages (2048)
+        # - Attach Files (32768)
+        # - Embed Links (16384)
+        # - Use Slash Commands is handled by applications.commands scope
+        permissions_int = 1024 + 2048 + 32768 + 16384  # = 52224
+
+        invite_url = (
+            f"https://discord.com/api/oauth2/authorize?"
+            f"client_id={self.bot.user.id}&permissions={permissions_int}&scope=bot%20applications.commands"
+        )
+
+        embed = discord.Embed(
+            title="🔐 TeamSync Bot Permissions",
+            description=(
+                "Use this invite link to add TeamSync to other servers with the correct permissions.\n\n"
+                f"**[Click here to invite TeamSync]({invite_url})**"
+            ),
+            colour=discord.Colour.green(),
+        )
+
+        embed.add_field(
+            name="Required Permissions",
+            value=(
+                "✅ **View Channels** - Read channel information\n"
+                "✅ **Send Messages** - Post schedules and responses\n"
+                "✅ **Attach Files** - Upload heatmap images\n"
+                "✅ **Embed Links** - Display rich embeds\n"
+                "✅ **Use Slash Commands** - Enable `/schedule` and other commands"
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
+            name="Permission Integer",
+            value=f"`{permissions_int}` (for manual configuration)",
+            inline=False,
+        )
+
+        embed.set_footer(text="These are the minimum permissions needed for TeamSync to function properly.")
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 # ---------------------------------------------------------------------------

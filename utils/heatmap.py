@@ -37,37 +37,50 @@ import pytz
 from PIL import Image, ImageDraw, ImageFont
 
 # ---------------------------------------------------------------------------
-# Layout constants (pixels)
+# Layout constants (pixels) - Dyslexia-friendly with larger cells and thicker borders
 # ---------------------------------------------------------------------------
 
-CELL_W = 64          # width of each day-column cell
-CELL_H = 28          # height of each hour-row cell
-LABEL_W = 52         # left column reserved for "HH:MM" hour labels
-HEADER_H = 44        # top row reserved for day-name headers
-PADDING = 12         # outer whitespace on all four sides
+CELL_W = 72          # width of each day-column cell (increased for better readability)
+CELL_H = 32          # height of each hour-row cell (increased for better readability)
+LABEL_W = 68         # left column reserved for "HH:MM AM/PM" hour labels (wider for 12-hour format)
+HEADER_H = 48        # top row reserved for day-name headers
+PADDING = 16         # outer whitespace on all four sides (increased)
+BORDER_WIDTH = 2     # thick cell borders for dyslexia-friendly design
 
 # Total image dimensions (computed once)
 IMG_W = PADDING + LABEL_W + 7 * CELL_W + PADDING
 IMG_H = PADDING + HEADER_H + 24 * CELL_H + PADDING
 
 # ---------------------------------------------------------------------------
-# Colours  (R, G, B)
+# Colours  (R, G, B) - High contrast, dyslexia-friendly palette
 # ---------------------------------------------------------------------------
 
-BACKGROUND  = (248, 249, 250)   # near-white canvas
-GRID_LINE   = (200, 200, 200)   # subtle cell borders
-HEADER_BG   = (44,  62,  80)    # dark-blue header bar
+BACKGROUND  = (255, 255, 255)   # pure white canvas for maximum contrast
+GRID_LINE   = (60,  60,  60)    # dark grey for thick, visible borders
+HEADER_BG   = (30,  58,  138)   # deep blue header bar (high contrast)
 HEADER_TEXT = (255, 255, 255)   # white text inside the header
-LABEL_TEXT  = (80,  80,  80)    # grey hour labels on the left
-EMPTY_CELL  = (230, 230, 230)   # no respondents
-LOW_COLOUR  = (198, 239, 198)   # light green – at least one person available
-HIGH_COLOUR = (0,   97,  0)     # dark green  – maximum overlap
+LABEL_TEXT  = (40,  40,  40)    # very dark grey hour labels on the left
+EMPTY_CELL  = (240, 240, 240)   # light grey for no respondents
+LOW_COLOUR  = (134, 239, 172)   # light saturated green – at least one person available
+HIGH_COLOUR = (21,  128, 61)    # dark saturated green – maximum overlap
 
 # ---------------------------------------------------------------------------
 # Day / hour metadata
 # ---------------------------------------------------------------------------
 
 DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+
+def _format_hour_12h(hour: int) -> str:
+    """Convert 24-hour format to 12-hour AM/PM format."""
+    if hour == 0:
+        return "12 AM"
+    elif hour < 12:
+        return f"{hour} AM"
+    elif hour == 12:
+        return "12 PM"
+    else:
+        return f"{hour - 12} PM"
 
 
 def _lerp_colour(
@@ -212,7 +225,7 @@ def generate_heatmap(
         y0 = header_y
         x1 = x0 + CELL_W
         y1 = y0 + CELL_H
-        draw.rectangle([x0, y0, x1, y1], fill=HEADER_BG, outline=GRID_LINE)
+        draw.rectangle([x0, y0, x1, y1], fill=HEADER_BG, outline=GRID_LINE, width=BORDER_WIDTH)
         _draw_centered_text(draw, day_name, x0, y0, x1, y1, font_bold, HEADER_TEXT)
 
     # ------------------------------------------------------------------
@@ -222,8 +235,8 @@ def generate_heatmap(
         y0 = PADDING + HEADER_H + row * CELL_H
         y1 = y0 + CELL_H
 
-        # Hour label on the left (e.g. "14:00")
-        label = f"{row:02d}:00"
+        # Hour label on the left (e.g. "2 PM")
+        label = _format_hour_12h(row)
         label_x = PADDING
         try:
             label_bbox = draw.textbbox((0, 0), label, font=font_regular)
@@ -240,7 +253,7 @@ def generate_heatmap(
             count  = display_grid.get((col, row), 0)
             colour = _cell_colour(count, max_count)
 
-            draw.rectangle([x0, y0, x1, y1], fill=colour, outline=GRID_LINE)
+            draw.rectangle([x0, y0, x1, y1], fill=colour, outline=GRID_LINE, width=BORDER_WIDTH)
 
             # Show the respondent count inside non-empty cells
             if count > 0:
@@ -359,6 +372,7 @@ def _draw_legend(
             [cx, legend_y, cx + swatch_size, legend_y + swatch_size],
             fill=colour,
             outline=GRID_LINE,
+            width=BORDER_WIDTH,
         )
         cx += swatch_size + 2
         draw.text((cx, legend_y), label, fill=LABEL_TEXT, font=font)
