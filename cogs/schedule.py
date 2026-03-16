@@ -252,9 +252,6 @@ async def setup(bot: commands.Bot) -> None:
     db: Database = bot.db  # type: ignore[attr-defined]
     cog = ScheduleCog(bot, db)
 
-    # Register the slash command group and the top-level /set_timezone command
-    bot.tree.add_command(cog.schedule_group)
-    bot.tree.add_command(cog.set_timezone)
-
+    # Add the cog; this automatically registers all decorated commands
     await bot.add_cog(cog)
     logger.info("ScheduleCog loaded.")
