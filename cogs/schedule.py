@@ -232,14 +232,14 @@ class ScheduleCog(commands.Cog, name="Schedule"):
 
     @app_commands.command(
         name="help",
-        description="Learn how to use TeamSync Bot.",
+        description="Learn how to use TickTock Bot.",
     )
     async def help_command(self, interaction: discord.Interaction) -> None:
         """Display a helpful guide about bot features and workflow."""
         embed = discord.Embed(
-            title="📚 TeamSync Bot Help",
+            title="📚 TickTock Bot Help",
             description=(
-                "**TeamSync** helps your team coordinate availability with interactive "
+                "**TickTock** helps your team coordinate availability with interactive "
                 "schedules and live-updating heatmaps.\n\n"
                 "**🔹 Getting Started**\n"
                 "1. Use `/schedule start` to create a new availability grid\n"
@@ -332,10 +332,10 @@ class ScheduleCog(commands.Cog, name="Schedule"):
         )
 
         embed = discord.Embed(
-            title="🔐 TeamSync Bot Permissions",
+            title="🔐 TickTock Bot Permissions",
             description=(
-                "Use this invite link to add TeamSync to other servers with the correct permissions.\n\n"
-                f"**[Click here to invite TeamSync]({invite_url})**"
+                "Use this invite link to add TickTock to other servers with the correct permissions.\n\n"
+                f"**[Click here to invite TickTock]({invite_url})**"
             ),
             colour=discord.Colour.green(),
         )
@@ -358,7 +358,7 @@ class ScheduleCog(commands.Cog, name="Schedule"):
             inline=False,
         )
 
-        embed.set_footer(text="These are the minimum permissions needed for TeamSync to function properly.")
+        embed.set_footer(text="These are the minimum permissions needed for TickTock to function properly.")
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 

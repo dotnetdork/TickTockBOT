@@ -297,7 +297,7 @@ def _build_embed(title: str, participant_count: int = 0) -> discord.Embed:
     embed = discord.Embed(
         title=f"📅  {title}",
         description=(
-            "**Welcome to TeamSync!** 🎯\n\n"
+            "**Welcome to TickTock!** 🎯\n\n"
             "Use the dropdowns below to select your available days and hours, "
             "then press **Submit** to save your availability.\n\n"
             "💡 *The heatmap will appear here after the first person submits!*\n\n"

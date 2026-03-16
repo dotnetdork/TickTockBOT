@@ -1,6 +1,6 @@
-# TeamSync Bot 🎯
+# TickTock Bot 🎯
 
-**TeamSync** is a modern, production-ready Discord bot that helps teams coordinate availability through interactive schedules and live-updating heatmaps. Built for game dev teams and any group that needs to sync schedules efficiently.
+**TickTock** is a modern, production-ready Discord bot that helps teams coordinate availability through interactive schedules and live-updating heatmaps. Built for game dev teams and any group that needs to sync schedules efficiently.
 
 [![Discord.py](https://img.shields.io/badge/discord.py-2.3.2%2B-blue.svg)](https://github.com/Rapptz/discord.py)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
@@ -18,12 +18,12 @@
 
 ## 📸 What It Looks Like
 
-When you run `/schedule start`, TeamSync posts an embed with interactive dropdowns:
+When you run `/schedule start`, TickTock posts an embed with interactive dropdowns:
 
 ```
 📅 Sprint Planning
 
-Welcome to TeamSync! 🎯
+Welcome to TickTock! 🎯
 
 Use the dropdowns below to select your available days and hours,
 then press Submit to save your availability.
@@ -114,10 +114,10 @@ After team members submit, a color-coded heatmap appears showing availability ov
 
 You should see:
 ```
-[INFO] teamsync: Extensions loaded. Slash command tree has X top-level commands.
-[INFO] teamsync: Logged in as TeamSync#1234 (ID: ...)
-[INFO] teamsync: Synced X application command(s) globally.
-[INFO] teamsync: TeamSync Bot is ready.
+[INFO] ticktock: Extensions loaded. Slash command tree has X top-level commands.
+[INFO] ticktock: Logged in as TickTock#1234 (ID: ...)
+[INFO] ticktock: Synced X application command(s) globally.
+[INFO] ticktock: TickTock Bot is ready.
 ```
 
 ## 📋 Commands
@@ -176,7 +176,7 @@ See the [full list of IANA timezones](https://en.wikipedia.org/wiki/List_of_tz_d
 
 ### `/help`
 
-Display a helpful guide about TeamSync's features and workflow.
+Display a helpful guide about TickTock's features and workflow.
 
 **Example:**
 ```
@@ -187,7 +187,7 @@ Display a helpful guide about TeamSync's features and workflow.
 
 ### `/permissions`
 
-Get the OAuth2 invite link with the exact permissions TeamSync needs. Share this with server admins for easy setup.
+Get the OAuth2 invite link with the exact permissions TickTock needs. Share this with server admins for easy setup.
 
 **Example:**
 ```
@@ -201,9 +201,9 @@ Get the OAuth2 invite link with the exact permissions TeamSync needs. Share this
 - ✅ **Embed Links** - Display rich embeds
 - ✅ **Use Slash Commands** - Enable `/schedule` and other commands
 
-## 🌐 Inviting TeamSync to Your Server
+## 🌐 Inviting TickTock to Your Server
 
-Use this link to invite TeamSync with the correct permissions:
+Use this link to invite TickTock with the correct permissions:
 
 ```
 https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_CLIENT_ID&permissions=52224&scope=bot%20applications.commands
@@ -225,7 +225,7 @@ Replace `YOUR_BOT_CLIENT_ID` with your bot's client ID from the [Discord Develop
 
 ### Deploy to JustRunMy.app
 
-[JustRunMy.app](https://justrunmy.app) is a simple hosting platform for Discord bots. Here's how to deploy TeamSync:
+[JustRunMy.app](https://justrunmy.app) is a simple hosting platform for Discord bots. Here's how to deploy TickTock:
 
 #### Step 1: Prepare Your Files
 
@@ -272,7 +272,7 @@ In the JustRunMy.app dashboard, add these environment variables:
 
 1. Click **"Deploy"** or **"Start"**
 2. Monitor the logs to ensure the bot starts successfully
-3. Look for: `TeamSync Bot is ready.`
+3. Look for: `TickTock Bot is ready.`
 
 #### Step 5: Verify in Discord
 
@@ -282,7 +282,7 @@ In the JustRunMy.app dashboard, add these environment variables:
 
 ### Deploy to Other Platforms
 
-TeamSync works on any Python hosting platform:
+TickTock works on any Python hosting platform:
 
 - **Heroku**: Use the provided `requirements.txt` and set environment variables in the dashboard
 - **Railway.app**: Connect your GitHub repo and set environment variables
@@ -325,7 +325,7 @@ schedulebot/
 
 ### Dyslexia-Friendly Features
 
-TeamSync was designed with accessibility in mind:
+TickTock was designed with accessibility in mind:
 
 - **12-hour AM/PM format** instead of 24-hour military time
 - **High contrast colors** (pure white background, dark text, saturated greens)
@@ -384,9 +384,9 @@ Use the PowerShell activation command:
 ### `❌ Missing Permissions - I don't have permission to attach files`
 
 **Solution:**
-1. Go to Server Settings → Roles → TeamSync Bot
+1. Go to Server Settings → Roles → TickTock Bot
 2. Enable **Attach Files** permission
-3. Or go to Channel Settings → Permissions → TeamSync Bot
+3. Or go to Channel Settings → Permissions → TickTock Bot
 4. Enable **Attach Files** for that specific channel
 
 ---
@@ -435,4 +435,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 Made with ❤️ for game dev teams and busy groups everywhere.
 
-**TeamSync** - Because coordinating schedules shouldn't be chaos.
+**TickTock** - Because coordinating schedules shouldn't be chaos.
